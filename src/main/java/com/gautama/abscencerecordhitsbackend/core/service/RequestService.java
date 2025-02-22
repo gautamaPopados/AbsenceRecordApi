@@ -8,9 +8,11 @@ import com.gautama.abscencerecordhitsbackend.core.model.Request;
 import com.gautama.abscencerecordhitsbackend.core.repository.RequestRepository;
 import com.gautama.abscencerecordhitsbackend.core.validator.DateValidator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -34,9 +36,13 @@ public class RequestService {
 
     public RequestDTO addRequest(RequestDTO requestDTO) {
         //проверка авторизации у пользователя
-        Request newRequest = requestMapper.toEntity(requestDTO);
-        Request savedRequest = saveRequest(newRequest);
-        return requestMapper.toDto(savedRequest);
+        if (dateValidator.checkDate(requestDTO.getStartedSkipping(), requestDTO.getFinishedSkipping())) {
+            Request newRequest = requestMapper.toEntity(requestDTO);
+            Request savedRequest = saveRequest(newRequest);
+            return requestMapper.toDto(savedRequest);
+        }
+
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Неккоректные входные данные для даты");
     }
 
     @Transactional

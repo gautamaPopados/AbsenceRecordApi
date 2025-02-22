@@ -1,8 +1,8 @@
 package com.gautama.abscencerecordhitsbackend.api.controller;
 
 import com.gautama.abscencerecordhitsbackend.api.dto.UserDTO;
+import com.gautama.abscencerecordhitsbackend.api.enums.Role;
 import com.gautama.abscencerecordhitsbackend.api.enums.UserQueryType;
-import com.gautama.abscencerecordhitsbackend.api.enums.UserRole;
 import com.gautama.abscencerecordhitsbackend.core.model.User;
 import com.gautama.abscencerecordhitsbackend.core.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +37,7 @@ public class UserController {
     }
 
     @PutMapping("/{userId}/grant-role")
-    public ResponseEntity<User> grantRole(@PathVariable Long userId, @RequestParam UserRole role) {
+    public ResponseEntity<User> grantRole(@PathVariable Long userId, @RequestParam Role role) {
         User updatedUser = userService.grantRole(userId, role);
         return ResponseEntity.ok(updatedUser);
     }

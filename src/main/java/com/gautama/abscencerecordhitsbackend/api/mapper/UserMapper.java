@@ -13,7 +13,7 @@ public class UserMapper {
         dto.setFirstName(user.getFirstName());
         dto.setLastName(user.getLastName());
         dto.setEmail(user.getEmail());
-        dto.setUserRole(user.getUserRole());
+        dto.setUserRole(user.getRole());
         return dto;
     }
 }

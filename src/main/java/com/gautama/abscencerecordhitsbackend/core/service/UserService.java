@@ -2,7 +2,7 @@ package com.gautama.abscencerecordhitsbackend.core.service;
 
 import com.gautama.abscencerecordhitsbackend.api.dto.UserDTO;
 import com.gautama.abscencerecordhitsbackend.api.enums.UserQueryType;
-import com.gautama.abscencerecordhitsbackend.api.enums.UserRole;
+import com.gautama.abscencerecordhitsbackend.api.enums.Role;
 import com.gautama.abscencerecordhitsbackend.api.mapper.UserMapper;
 import com.gautama.abscencerecordhitsbackend.core.model.User;
 import com.gautama.abscencerecordhitsbackend.core.repository.UserRepository;
@@ -73,11 +73,11 @@ public class UserService implements UserDetailsService {
         if (queryType == null || queryType == UserQueryType.ALL) {
             users = userRepository.findAll();
         } else if (queryType == UserQueryType.TEACHERS) {
-            users = userRepository.findAllByUserRole(UserRole.TEACHER);
+            users = userRepository.findAllByRole(Role.TEACHER);
         } else if (queryType == UserQueryType.STUDENTS) {
-            users = userRepository.findAllByUserRole(UserRole.STUDENT);
+            users = userRepository.findAllByRole(Role.STUDENT);
         } else if (queryType == UserQueryType.WITHOUT_ROLE) {
-            users = userRepository.findAllByUserRoleIsNull();
+            users = userRepository.findAllByRoleIsNull();
         } else {
             throw new IllegalArgumentException("Неизвестный тип запроса пользователей: " + queryType);
         }
