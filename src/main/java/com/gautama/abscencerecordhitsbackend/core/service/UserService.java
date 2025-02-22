@@ -1,9 +1,8 @@
 package com.gautama.abscencerecordhitsbackend.core.service;
 
-import com.gautama.abscencerecordhitsbackend.api.enums.UserRole;
+import com.gautama.abscencerecordhitsbackend.api.enums.Role;
 import com.gautama.abscencerecordhitsbackend.core.model.User;
 import com.gautama.abscencerecordhitsbackend.core.repository.UserRepository;
-import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -30,18 +29,18 @@ public class UserService implements UserDetailsService {
         }
 
         User user = optionalUser.get();
-        if (user.getRole() == UserRole.DEANERY) {
+        if (user.getRole() == Role.DEANERY) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "У пользователя с ID " + userId + " уже есть роль Деканат.");
         }
 
-        user.setRole(UserRole.DEANERY);
+        user.setRole(Role.DEANERY);
         return userRepository.save(user);
     }
 
     public UserDetails loadUserByUsername(String username) {
         return userRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException(username));
     }
-    public User grantRole(Long userId, UserRole role) {
+    public User grantRole(Long userId, Role role) {
         Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь с ID " + userId + " не найден.");
@@ -49,7 +48,7 @@ public class UserService implements UserDetailsService {
 
         User user = optionalUser.get();
 
-        if (role == UserRole.DEANERY) {
+        if (role == Role.DEANERY) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Назначение роли Деканат доступно только Админу.");
         }
 
