@@ -1,6 +1,9 @@
 package com.gautama.abscencerecordhitsbackend.core.service;
 
+import com.gautama.abscencerecordhitsbackend.api.dto.UserDTO;
+import com.gautama.abscencerecordhitsbackend.api.enums.UserQueryType;
 import com.gautama.abscencerecordhitsbackend.api.enums.UserRole;
+import com.gautama.abscencerecordhitsbackend.api.mapper.UserMapper;
 import com.gautama.abscencerecordhitsbackend.core.model.User;
 import com.gautama.abscencerecordhitsbackend.core.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,16 +11,20 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
     @Autowired
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, UserMapper userMapper) {
         this.userRepository = userRepository;
+        this.userMapper = userMapper;
     }
 
     public User grantDeanRole(Long userId) {
@@ -55,4 +62,23 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    public List<UserDTO> getUsers(UserQueryType queryType) {
+        List<User> users;
+
+        if (queryType == null || queryType == UserQueryType.ALL) {
+            users = userRepository.findAll();
+        } else if (queryType == UserQueryType.TEACHERS) {
+            users = userRepository.findAllByUserRole(UserRole.TEACHER);
+        } else if (queryType == UserQueryType.STUDENTS) {
+            users = userRepository.findAllByUserRole(UserRole.STUDENT);
+        } else if (queryType == UserQueryType.WITHOUT_ROLE) {
+            users = userRepository.findAllByUserRoleIsNull();
+        } else {
+            throw new IllegalArgumentException("Неизвестный тип запроса пользователей: " + queryType);
+        }
+
+        return users.stream()
+                .map(userMapper::userToUserDto)
+                .collect(Collectors.toList());
+    }
 }
