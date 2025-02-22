@@ -15,5 +15,4 @@ public enum Role {
     Role(String displayName) {
         this.displayName = displayName;
     }
-
 }
