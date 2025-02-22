@@ -34,4 +34,25 @@ public class UserService {
         user.setUserRole(UserRole.DEANERY);
         return userRepository.save(user);
     }
+
+    public User grantRole(Long userId, UserRole role) {
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (optionalUser.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь с ID " + userId + " не найден.");
+        }
+
+        User user = optionalUser.get();
+
+        if (role == UserRole.DEANERY) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Назначение роли Деканат доступно только Админу.");
+        }
+
+        if (user.getUserRole() == role) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "У пользователя с ID " + userId + " уже есть роль " + role.getDisplayName() + ".");
+        }
+
+        user.setUserRole(role);
+        return userRepository.save(user);
+    }
+
 }
