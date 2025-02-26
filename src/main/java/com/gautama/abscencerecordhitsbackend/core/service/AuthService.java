@@ -1,7 +1,7 @@
 package com.gautama.abscencerecordhitsbackend.core.service;
 
 import com.gautama.abscencerecordhitsbackend.api.config.JwtUtil;
-import com.gautama.abscencerecordhitsbackend.api.dto.RegisterRequest;
+import com.gautama.abscencerecordhitsbackend.api.dto.RegisterDTO;
 import com.gautama.abscencerecordhitsbackend.api.enums.Role;
 import com.gautama.abscencerecordhitsbackend.core.model.RevokedToken;
 import com.gautama.abscencerecordhitsbackend.core.model.User;
@@ -23,18 +23,18 @@ public class AuthService {
     private final RevokedTokenRepository revokedTokenRepository;
     private final JwtUtil jwtUtil;
 
-    public String register(RegisterRequest request) {
-        if (userRepository.findByEmail(request.email()).isPresent()) {
-            throw new RuntimeException("User already exists!");
+    public String register(RegisterDTO request) {
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new RuntimeException("Пользователь уже существует.");
         }
 
         Role role = Role.USER;
 
         User user = new User();
-        user.setFirstName(request.firstName());
-        user.setLastName(request.lastName());
-        user.setEmail(request.email());
-        user.setPassword(passwordEncoder.encode(request.password()));
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        user.setEmail(request.getEmail());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(role);
 
         userRepository.save(user);
@@ -43,7 +43,7 @@ public class AuthService {
 
     public String login(String email, String password) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Пользователь не найден."));
         return jwtUtil.generateToken(user);
     }
 
@@ -51,7 +51,7 @@ public class AuthService {
     public void logout(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new RuntimeException("Invalid token");
+            throw new RuntimeException("Неверный токен.");
         }
 
         String token = authHeader.substring(7);

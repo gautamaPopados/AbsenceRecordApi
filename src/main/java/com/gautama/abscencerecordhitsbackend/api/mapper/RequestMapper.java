@@ -1,18 +1,20 @@
 package com.gautama.abscencerecordhitsbackend.api.mapper;
 
 import com.gautama.abscencerecordhitsbackend.api.dto.RequestDTO;
-import com.gautama.abscencerecordhitsbackend.api.dto.ResultExtendRequestDate;
+import com.gautama.abscencerecordhitsbackend.api.dto.ExtendRequestDateResultDTO;
+import com.gautama.abscencerecordhitsbackend.api.dto.RequestResultDTO;
 import com.gautama.abscencerecordhitsbackend.api.enums.RequestStatus;
 import com.gautama.abscencerecordhitsbackend.core.model.Request;
 import org.springframework.stereotype.Component;
 
 @Component
 public class RequestMapper {
-    public RequestDTO toDto(Request request) {
+    public RequestResultDTO toDto(Request request) {
         if (request == null) {
             return null;
         }
-        return new RequestDTO(
+        return new RequestResultDTO(
+                request.getId(),
                 request.getStartedSkipping(),
                 request.getFinishedSkipping()
         );
@@ -29,12 +31,12 @@ public class RequestMapper {
                 .build();
     }
 
-    public ResultExtendRequestDate toResultChange(Request request) {
+    public ExtendRequestDateResultDTO toResultChange(Request request) {
         if (request == null) {
             return null;
         }
 
-        return new ResultExtendRequestDate(
+        return new ExtendRequestDateResultDTO(
                 request.getId(),
                 request.getFinishedSkipping()
         );
