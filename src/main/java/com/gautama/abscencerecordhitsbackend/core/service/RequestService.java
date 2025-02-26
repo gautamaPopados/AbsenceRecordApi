@@ -4,6 +4,7 @@ import com.gautama.abscencerecordhitsbackend.api.dto.ExtendRequestDateDTO;
 import com.gautama.abscencerecordhitsbackend.api.dto.RequestDTO;
 import com.gautama.abscencerecordhitsbackend.api.dto.ExtendRequestDateResultDTO;
 import com.gautama.abscencerecordhitsbackend.api.dto.RequestResultDTO;
+import com.gautama.abscencerecordhitsbackend.api.enums.RequestStatus;
 import com.gautama.abscencerecordhitsbackend.api.mapper.RequestMapper;
 import com.gautama.abscencerecordhitsbackend.core.model.Request;
 import com.gautama.abscencerecordhitsbackend.core.repository.RequestRepository;
@@ -26,18 +27,21 @@ public class RequestService {
         this.dateValidator = dateValidator;
     }
 
-    public Request saveRequest(Request request) {
-        return requestRepository.save(request);
-    }
 
     public RequestResultDTO createRequest(RequestDTO requestDTO) {
         if (dateValidator.checkDate(requestDTO.getStartedSkipping(), requestDTO.getFinishedSkipping())) {
             Request newRequest = requestMapper.toEntity(requestDTO);
-            Request savedRequest = saveRequest(newRequest);
+            Request savedRequest = requestRepository.save(newRequest);
             return requestMapper.toDto(savedRequest);
         }
 
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректные входные данные для даты.");
+    }
+
+    public void changeRequestStatus(Long id, RequestStatus requestStatus) {
+        Request request = requestRepository.findById(id).orElseThrow(() -> new RuntimeException("Заявка не найдена."));
+        request.setStatus(requestStatus);
+        requestRepository.save(request);
     }
 
     @Transactional
@@ -46,7 +50,7 @@ public class RequestService {
                 .filter(request -> dateValidator.checkDate(request.getFinishedSkipping(), extendDateDTO.getExtendSkipping()))
                 .map(request -> {
                     request.setFinishedSkipping(extendDateDTO.getExtendSkipping());
-                    return saveRequest(request);
+                    return requestRepository.save(request);
                 })
                 .map(requestMapper::toResultChange)
                 .orElse(null);

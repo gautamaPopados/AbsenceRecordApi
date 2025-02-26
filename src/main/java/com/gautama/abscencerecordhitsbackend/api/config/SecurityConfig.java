@@ -40,6 +40,7 @@ public class SecurityConfig extends WebSecurityConfiguration {
                         .requestMatchers("/auth/register", "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/request/**").hasAuthority(Role.STUDENT.toString())
                         .requestMatchers(HttpMethod.GET, "/{userId}/grant-role").hasAuthority(Role.DEANERY.toString())
+                        .requestMatchers(HttpMethod.PATCH, "/request/{id}/status").hasAuthority(Role.DEANERY.toString())
                         .requestMatchers(HttpMethod.PUT, "/api/users/{userId}/grant-dean-role").hasAuthority(Role.ADMIN.toString())
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

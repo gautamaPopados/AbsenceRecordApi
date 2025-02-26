@@ -4,6 +4,7 @@ import com.gautama.abscencerecordhitsbackend.api.dto.ExtendRequestDateDTO;
 import com.gautama.abscencerecordhitsbackend.api.dto.RequestDTO;
 import com.gautama.abscencerecordhitsbackend.api.dto.ExtendRequestDateResultDTO;
 import com.gautama.abscencerecordhitsbackend.api.dto.RequestResultDTO;
+import com.gautama.abscencerecordhitsbackend.api.enums.RequestStatus;
 import com.gautama.abscencerecordhitsbackend.core.service.RequestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -30,5 +31,11 @@ public class RequestController {
             return ResponseEntity.status(HttpStatus.OK).body(extendRequest);
         }
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Неккоректные входные данные для даты");
+    }
+
+    @PatchMapping("/request/{id}/status")
+    public ResponseEntity<?> changeRequestStatus(@PathVariable Long id, @RequestBody RequestStatus requestStatus) {
+        requestService.changeRequestStatus(id, requestStatus);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }
