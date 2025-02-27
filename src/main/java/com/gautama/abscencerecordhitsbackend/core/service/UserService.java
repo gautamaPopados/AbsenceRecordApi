@@ -44,9 +44,10 @@ public class UserService implements UserDetailsService {
         return userRepository.save(user);
     }
 
-    public UserDetails loadUserByUsername(String username) {
-        return userRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException(username));
+    public User loadUserByUsername(String username) {
+        return userRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException("Пользователь с почтой: " + username + " не найден"));
     }
+
     public User grantRole(Long userId, Role role) {
         Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isEmpty()) {

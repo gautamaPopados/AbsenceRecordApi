@@ -1,5 +1,6 @@
 package com.gautama.abscencerecordhitsbackend.core.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.gautama.abscencerecordhitsbackend.api.enums.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -31,6 +32,10 @@ public class User implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<Request> requests;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

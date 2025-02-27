@@ -5,6 +5,7 @@ import com.gautama.abscencerecordhitsbackend.api.dto.ExtendRequestDateResultDTO;
 import com.gautama.abscencerecordhitsbackend.api.dto.RequestResultDTO;
 import com.gautama.abscencerecordhitsbackend.api.enums.RequestStatus;
 import com.gautama.abscencerecordhitsbackend.core.model.Request;
+import com.gautama.abscencerecordhitsbackend.core.model.User;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -20,13 +21,14 @@ public class RequestMapper {
         );
     }
 
-    public Request toEntity(RequestDTO requestDTO) {
+    public Request toEntity(RequestDTO requestDTO, User user) {
         if (requestDTO == null) {
             return null;
         }
         return Request.builder()
                 .startedSkipping(requestDTO.getStartedSkipping())
                 .finishedSkipping(requestDTO.getFinishedSkipping())
+                .user(user)
                 .status(RequestStatus.PENDING)
                 .build();
     }

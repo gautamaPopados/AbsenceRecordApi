@@ -38,6 +38,7 @@ public class SecurityConfig extends WebSecurityConfiguration {
                 .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/auth/register", "/auth/login").permitAll()
+                        .requestMatchers("/error").permitAll()
                         .requestMatchers(HttpMethod.POST, "/request/**").hasAuthority(Role.STUDENT.toString())
                         .requestMatchers(HttpMethod.GET, "/{userId}/grant-role").hasAuthority(Role.DEANERY.toString())
                         .requestMatchers(HttpMethod.PUT, "/api/users/{userId}/grant-dean-role").hasAuthority(Role.ADMIN.toString())
