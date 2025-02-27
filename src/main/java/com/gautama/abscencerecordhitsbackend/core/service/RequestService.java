@@ -1,10 +1,6 @@
 package com.gautama.abscencerecordhitsbackend.core.service;
 
-import com.gautama.abscencerecordhitsbackend.api.dto.ExtendRequestDateDTO;
-import com.gautama.abscencerecordhitsbackend.api.dto.FileResultDTO;
-import com.gautama.abscencerecordhitsbackend.api.dto.RequestDTO;
-import com.gautama.abscencerecordhitsbackend.api.dto.ExtendRequestDateResultDTO;
-import com.gautama.abscencerecordhitsbackend.api.dto.RequestResultDTO;
+import com.gautama.abscencerecordhitsbackend.api.dto.*;
 import com.gautama.abscencerecordhitsbackend.api.mapper.RequestMapper;
 import com.gautama.abscencerecordhitsbackend.core.model.FileEntity;
 import com.gautama.abscencerecordhitsbackend.core.model.Request;
@@ -14,32 +10,40 @@ import com.gautama.abscencerecordhitsbackend.core.repository.RequestRepository;
 import com.gautama.abscencerecordhitsbackend.core.repository.UserRepository;
 import com.gautama.abscencerecordhitsbackend.core.validator.DateValidator;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
 public class RequestService {
     public final RequestRepository requestRepository;
     private final FileRepository fileRepository;
+    private final UserRepository userRepository;
     private final UserService userService;
     private final RequestMapper requestMapper;
     private final DateValidator dateValidator;
 
-    public RequestService(RequestRepository requestRepository, FileRepository fileRepository, UserService userService,
+    public RequestService(RequestRepository requestRepository, FileRepository fileRepository, UserRepository userRepository, UserService userService,
                           RequestMapper requestMapper, DateValidator dateValidator) {
         this.requestRepository = requestRepository;
         this.fileRepository = fileRepository;
+        this.userRepository = userRepository;
         this.userService = userService;
         this.requestMapper = requestMapper;
         this.dateValidator = dateValidator;
@@ -113,5 +117,62 @@ public class RequestService {
         fileResultDTO.setId(fileEntity.getId());
 
         return fileResultDTO;
+    }
+
+    @Transactional(readOnly = true)
+    public RequestDetailsDTO getRequestWithFileDownloadLink(Long requestId) throws AccessDeniedException {
+        Request request = requestRepository.findById(requestId)
+                .orElseThrow(() -> new EntityNotFoundException("Заявки с указанным id не найдено: " + requestId));
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String email = userDetails.getUsername();
+
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Пользователь с email " + email + " не найден"));
+        Long userId = currentUser.getId();
+
+        boolean isStudent = authentication.getAuthorities().stream()
+                .anyMatch(role -> role.getAuthority().equals("STUDENT"));
+
+        if (isStudent && !request.getUser().getId().equals(userId)) {
+            throw new AccessDeniedException("Вы не можете просматривать чужие заявки");
+        }
+
+        RequestDetailsDTO requestDetailsDTO = new RequestDetailsDTO();
+        requestDetailsDTO.setId(request.getId());
+        requestDetailsDTO.setStartedSkipping(request.getStartedSkipping());
+        requestDetailsDTO.setFinishedSkipping(request.getFinishedSkipping());
+        requestDetailsDTO.setStatus(request.getStatus().toString());
+        requestDetailsDTO.setUserId(request.getUser().getId());
+
+        List<FileInfoDto> fileInfoDtos = request.getProofs().stream()
+                .map(fileEntity -> {
+                    FileInfoDto fileInfoDto = new FileInfoDto();
+                    fileInfoDto.setId(fileEntity.getId());
+                    fileInfoDto.setFileName(fileEntity.getFileName());
+                    String downloadURL = ServletUriComponentsBuilder.fromCurrentContextPath()
+                            .path("/api/requests/files/")
+                            .path(String.valueOf(fileEntity.getId()))
+                            .toUriString();
+                    fileInfoDto.setDownloadUrl(downloadURL);
+                    return fileInfoDto;
+                })
+                .collect(Collectors.toList());
+
+        requestDetailsDTO.setFiles(fileInfoDtos);
+
+        return requestDetailsDTO;
+    }
+
+    @Transactional(readOnly = true)
+    public ResponseEntity<byte[]> downloadFile(Long fileId) {
+        FileEntity fileEntity = fileRepository.findById(fileId)
+                .orElseThrow(() -> new EntityNotFoundException("Файл с указанным id не найден: " + fileId));
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileEntity.getFileName() + "\"")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(fileEntity.getFileData());
     }
 }

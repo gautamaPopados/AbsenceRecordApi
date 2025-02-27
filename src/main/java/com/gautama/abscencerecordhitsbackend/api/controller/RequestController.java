@@ -1,10 +1,6 @@
 package com.gautama.abscencerecordhitsbackend.api.controller;
 
-import com.gautama.abscencerecordhitsbackend.api.dto.ExtendRequestDateDTO;
-import com.gautama.abscencerecordhitsbackend.api.dto.FileResultDTO;
-import com.gautama.abscencerecordhitsbackend.api.dto.RequestDTO;
-import com.gautama.abscencerecordhitsbackend.api.dto.ExtendRequestDateResultDTO;
-import com.gautama.abscencerecordhitsbackend.api.dto.RequestResultDTO;
+import com.gautama.abscencerecordhitsbackend.api.dto.*;
 import com.gautama.abscencerecordhitsbackend.core.service.RequestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,7 +11,7 @@ import org.springframework.web.server.ResponseStatusException;
 import io.swagger.v3.oas.annotations.Parameter;
 
 import java.io.IOException;
-
+import java.nio.file.AccessDeniedException;
 
 @RestController
 @RequiredArgsConstructor
@@ -49,5 +45,16 @@ public class RequestController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Ошибка при прикреплении файла: " + e.getMessage());
         }
+    }
+
+    @GetMapping("/request_info/{id}")
+    public ResponseEntity<RequestDetailsDTO> getRequestWithFileDownloadLink(@PathVariable Long id) throws AccessDeniedException {
+        RequestDetailsDTO requestDetailsDTO = requestService.getRequestWithFileDownloadLink(id);
+        return ResponseEntity.ok(requestDetailsDTO);
+    }
+
+    @GetMapping("/files/{fileId}")
+    public ResponseEntity<byte[]> downloadFile(@PathVariable Long fileId) {
+        return requestService.downloadFile(fileId);
     }
 }
