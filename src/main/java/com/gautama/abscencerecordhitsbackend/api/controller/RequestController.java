@@ -47,6 +47,12 @@ public class RequestController {
         }
     }
 
+    @DeleteMapping(value = "/file/unpin/{requestId}/{fileId}")
+    public ResponseEntity<String> unpinConfirmationFile(@PathVariable Long requestId, @PathVariable Long fileId) {
+        requestService.unpinFile(requestId, fileId);
+        return ResponseEntity.status(HttpStatus.OK).body("Файл был успешно откреплен");
+    }
+
     @GetMapping("/request_info/{id}")
     public ResponseEntity<RequestDetailsDTO> getRequestWithFileDownloadLink(@PathVariable Long id) throws AccessDeniedException {
         RequestDetailsDTO requestDetailsDTO = requestService.getRequestWithFileDownloadLink(id);

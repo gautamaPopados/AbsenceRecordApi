@@ -119,6 +119,27 @@ public class RequestService {
         return fileResultDTO;
     }
 
+    @Transactional
+    public void unpinFile(Long requestId, Long fileId) {
+        Request request = getRequest(requestId);
+
+        FileEntity fileToRemove = request.getProofs().stream()
+                .filter(file -> file.getId().equals(fileId))
+                .findFirst()
+                .orElseThrow(() -> new EntityNotFoundException("Файл с id " + fileId + " не найден в заявке с id " + requestId));
+
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User currentUser = userService.loadUserByUsername(userDetails.getUsername());
+
+        if (!request.getUser().getId().equals(currentUser.getId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Это не ваша заявки либо не ваш файл");
+        }
+
+        request.getProofs().remove(fileToRemove);
+
+        requestRepository.save(request);
+    }
+
     @Transactional(readOnly = true)
     public RequestDetailsDTO getRequestWithFileDownloadLink(Long requestId) throws AccessDeniedException {
         Request request = requestRepository.findById(requestId)
