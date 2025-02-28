@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -62,5 +63,11 @@ public class RequestController {
     @GetMapping("/files/{fileId}")
     public ResponseEntity<byte[]> downloadFile(@PathVariable Long fileId) {
         return requestService.downloadFile(fileId);
+    }
+
+    @GetMapping("/request_list")
+    public ResponseEntity<List<RequestListDTO>> getAllRequests(@RequestParam(required = false) Long userId) {
+        List<RequestListDTO> requests = requestService.getAllRequests(userId);
+        return ResponseEntity.ok(requests);
     }
 }

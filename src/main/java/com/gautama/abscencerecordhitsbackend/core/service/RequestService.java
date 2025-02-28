@@ -196,4 +196,32 @@ public class RequestService {
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(fileEntity.getFileData());
     }
+
+    public List<RequestListDTO> getAllRequests(Long userId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        boolean isStudent = authentication.getAuthorities().stream()
+                .anyMatch(role -> role.getAuthority().equals("STUDENT"));
+
+        List<Request> requests;
+
+        if (isStudent) {
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            String email = userDetails.getUsername();
+
+            User currentUser = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new EntityNotFoundException("Пользователь с email " + email + " не найден"));
+            Long currentUserId = currentUser.getId();
+            requests = requestRepository.findByUser_Id(currentUserId);
+        } else {
+            if (userId != null) {
+                requests = requestRepository.findByUser_Id(userId);
+            } else {
+                requests = requestRepository.findAll();
+            }
+        }
+
+        return requests.stream()
+                .map(requestMapper::requestToRequestListDTO)
+                .collect(Collectors.toList());
+    }
 }
