@@ -1,6 +1,7 @@
 package com.gautama.abscencerecordhitsbackend.api.config;
 
 import com.gautama.abscencerecordhitsbackend.api.enums.Role;
+import com.gautama.abscencerecordhitsbackend.api.filter.JwtAuthenticationFilter;
 import com.gautama.abscencerecordhitsbackend.core.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -36,7 +37,13 @@ public class SecurityConfig extends WebSecurityConfiguration {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/v2/api-docs",
+                                "/configuration/ui",
+                                "/swagger-resources/**",
+                                "/configuration/security",
+                                "/swagger-ui/**",
+                                "/webjars/**",
+                                "/v3/api-docs/**").permitAll()
                         .requestMatchers("/auth/register", "/auth/login").permitAll()
                         .requestMatchers("/error").permitAll()
                         .requestMatchers(HttpMethod.POST, "/request/**").hasAuthority(Role.STUDENT.toString())
