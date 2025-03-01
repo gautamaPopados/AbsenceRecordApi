@@ -92,7 +92,7 @@ public class RequestService {
                 .filter(request -> dateValidator.checkDate(request.getFinishedSkipping(), extendDateDTO.getExtendSkipping()))
                 .map(request -> {
                     request.setFinishedSkipping(extendDateDTO.getExtendSkipping());
-                    return saveRequest(request);
+                    return requestRepository.save(request);
                 })
                 .map(requestMapper::toResultChange)
                 .orElse(null);

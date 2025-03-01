@@ -39,12 +39,6 @@ public class RequestController {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Неккоректные входные данные для даты");
     }
 
-    @PatchMapping("/request/{id}/status")
-    public ResponseEntity<?> changeRequestStatus(@PathVariable Long id, @RequestBody RequestStatus requestStatus) {
-        requestService.changeRequestStatus(id, requestStatus);
-        return ResponseEntity.status(HttpStatus.OK).build();
-    }
-
     @PostMapping(value = "/upload/{requestId}", consumes = "multipart/form-data")
     public ResponseEntity<?> uploadFile(
             @PathVariable Long requestId,
@@ -80,5 +74,11 @@ public class RequestController {
     public ResponseEntity<List<RequestListDTO>> getAllRequests(@RequestParam(required = false) Long userId) {
         List<RequestListDTO> requests = requestService.getAllRequests(userId);
         return ResponseEntity.ok(requests);
+    }
+
+    @PatchMapping("/request/{id}/status")
+    public ResponseEntity<?> changeRequestStatus(@PathVariable Long id, @RequestBody RequestStatus requestStatus) {
+        requestService.changeRequestStatus(id, requestStatus);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }
