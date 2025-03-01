@@ -2,6 +2,7 @@ package com.gautama.abscencerecordhitsbackend.api.mapper;
 
 import com.gautama.abscencerecordhitsbackend.api.dto.RequestDTO;
 import com.gautama.abscencerecordhitsbackend.api.dto.ExtendRequestDateResultDTO;
+import com.gautama.abscencerecordhitsbackend.api.dto.RequestListDTO;
 import com.gautama.abscencerecordhitsbackend.api.dto.RequestResultDTO;
 import com.gautama.abscencerecordhitsbackend.api.enums.RequestStatus;
 import com.gautama.abscencerecordhitsbackend.core.model.Request;
@@ -42,5 +43,20 @@ public class RequestMapper {
                 request.getId(),
                 request.getFinishedSkipping()
         );
+    }
+
+
+    public RequestListDTO requestToRequestListDTO(Request request) {
+        if (request == null) {
+            return null;
+        }
+
+        RequestListDTO dto = new RequestListDTO();
+        dto.setId(request.getId());
+        dto.setStartedSkipping(request.getStartedSkipping());
+        dto.setFinishedSkipping(request.getFinishedSkipping());
+        dto.setStatus(String.valueOf(request.getStatus()));
+        dto.setUserId(request.getUser() != null ? request.getUser().getId() : null);
+        return dto;
     }
 }

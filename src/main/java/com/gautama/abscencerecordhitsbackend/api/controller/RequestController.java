@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -58,6 +59,12 @@ public class RequestController {
         }
     }
 
+    @DeleteMapping(value = "/file/unpin/{requestId}/{fileId}")
+    public ResponseEntity<String> unpinConfirmationFile(@PathVariable Long requestId, @PathVariable Long fileId) {
+        requestService.unpinFile(requestId, fileId);
+        return ResponseEntity.status(HttpStatus.OK).body("Файл был успешно откреплен");
+    }
+
     @GetMapping("/request_info/{id}")
     public ResponseEntity<RequestDetailsDTO> getRequestWithFileDownloadLink(@PathVariable Long id) throws AccessDeniedException {
         RequestDetailsDTO requestDetailsDTO = requestService.getRequestWithFileDownloadLink(id);
@@ -67,5 +74,11 @@ public class RequestController {
     @GetMapping("/files/{fileId}")
     public ResponseEntity<byte[]> downloadFile(@PathVariable Long fileId) {
         return requestService.downloadFile(fileId);
+    }
+
+    @GetMapping("/request_list")
+    public ResponseEntity<List<RequestListDTO>> getAllRequests(@RequestParam(required = false) Long userId) {
+        List<RequestListDTO> requests = requestService.getAllRequests(userId);
+        return ResponseEntity.ok(requests);
     }
 }

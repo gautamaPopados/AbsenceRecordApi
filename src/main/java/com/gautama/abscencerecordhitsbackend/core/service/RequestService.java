@@ -130,6 +130,27 @@ public class RequestService {
         return fileResultDTO;
     }
 
+    @Transactional
+    public void unpinFile(Long requestId, Long fileId) {
+        Request request = getRequest(requestId);
+
+        FileEntity fileToRemove = request.getProofs().stream()
+                .filter(file -> file.getId().equals(fileId))
+                .findFirst()
+                .orElseThrow(() -> new EntityNotFoundException("Файл с id " + fileId + " не найден в заявке с id " + requestId));
+
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User currentUser = userService.loadUserByUsername(userDetails.getUsername());
+
+        if (!request.getUser().getId().equals(currentUser.getId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Это не ваша заявки либо не ваш файл");
+        }
+
+        request.getProofs().remove(fileToRemove);
+
+        requestRepository.save(request);
+    }
+
     @Transactional(readOnly = true)
     public RequestDetailsDTO getRequestWithFileDownloadLink(Long requestId) throws AccessDeniedException {
         Request request = requestRepository.findById(requestId)
@@ -185,5 +206,33 @@ public class RequestService {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileEntity.getFileName() + "\"")
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(fileEntity.getFileData());
+    }
+
+    public List<RequestListDTO> getAllRequests(Long userId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        boolean isStudent = authentication.getAuthorities().stream()
+                .anyMatch(role -> role.getAuthority().equals("STUDENT"));
+
+        List<Request> requests;
+
+        if (isStudent) {
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            String email = userDetails.getUsername();
+
+            User currentUser = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new EntityNotFoundException("Пользователь с email " + email + " не найден"));
+            Long currentUserId = currentUser.getId();
+            requests = requestRepository.findByUser_Id(currentUserId);
+        } else {
+            if (userId != null) {
+                requests = requestRepository.findByUser_Id(userId);
+            } else {
+                requests = requestRepository.findAll();
+            }
+        }
+
+        return requests.stream()
+                .map(requestMapper::requestToRequestListDTO)
+                .collect(Collectors.toList());
     }
 }
