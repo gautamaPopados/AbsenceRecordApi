@@ -4,6 +4,7 @@ import com.gautama.abscencerecordhitsbackend.api.dto.LoginDTO;
 import com.gautama.abscencerecordhitsbackend.api.dto.RegisterDTO;
 import com.gautama.abscencerecordhitsbackend.core.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +16,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody RegisterDTO request) {
+    public ResponseEntity<String> register(@RequestBody @Valid RegisterDTO request) {
         return ResponseEntity.ok(authService.register(request));
     }
 
