@@ -19,18 +19,18 @@ import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.util.List;
 
-@RestController
+@RestController("/request")
 @RequiredArgsConstructor
 public class RequestController {
     private final RequestService requestService;
 
-    @PostMapping("/request")
+    @PostMapping
     public ResponseEntity<RequestResultDTO> createRequest(@RequestBody RequestDTO requestDTO) {
         RequestResultDTO savedRequestDto = requestService.createRequest(requestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedRequestDto);
     }
 
-    @PatchMapping("/request/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<?> extendDateRequest(@PathVariable Long id, @RequestBody ExtendRequestDateDTO extendDateDTO) {
         ExtendRequestDateResultDTO extendRequest = requestService.extendDate(id, extendDateDTO);
         if (extendRequest != null) {
@@ -59,7 +59,7 @@ public class RequestController {
         return ResponseEntity.status(HttpStatus.OK).body("Файл был успешно откреплен");
     }
 
-    @GetMapping("/request_info/{id}")
+    @GetMapping("/info/{id}")
     public ResponseEntity<RequestDetailsDTO> getRequestWithFileDownloadLink(@PathVariable Long id) throws AccessDeniedException {
         RequestDetailsDTO requestDetailsDTO = requestService.getRequestWithFileDownloadLink(id);
         return ResponseEntity.ok(requestDetailsDTO);
@@ -70,13 +70,13 @@ public class RequestController {
         return requestService.downloadFile(fileId);
     }
 
-    @GetMapping("/request_list")
+    @GetMapping("/list")
     public ResponseEntity<List<RequestListDTO>> getAllRequests(@RequestParam(required = false) Long userId) {
         List<RequestListDTO> requests = requestService.getAllRequests(userId);
         return ResponseEntity.ok(requests);
     }
 
-    @PatchMapping("/request/{id}/status")
+    @PatchMapping("/{id}/status")
     public ResponseEntity<?> changeRequestStatus(@PathVariable Long id, @RequestBody RequestStatus requestStatus) {
         requestService.changeRequestStatus(id, requestStatus);
         return ResponseEntity.status(HttpStatus.OK).build();
