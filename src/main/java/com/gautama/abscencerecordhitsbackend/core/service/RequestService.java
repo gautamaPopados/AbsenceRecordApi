@@ -1,11 +1,7 @@
 package com.gautama.abscencerecordhitsbackend.core.service;
 
-import com.gautama.abscencerecordhitsbackend.api.dto.ExtendRequestDateDTO;
-import com.gautama.abscencerecordhitsbackend.api.dto.RequestDTO;
-import com.gautama.abscencerecordhitsbackend.api.dto.ExtendRequestDateResultDTO;
-import com.gautama.abscencerecordhitsbackend.api.dto.RequestResultDTO;
-import com.gautama.abscencerecordhitsbackend.api.enums.RequestStatus;
 import com.gautama.abscencerecordhitsbackend.api.dto.*;
+import com.gautama.abscencerecordhitsbackend.api.enums.RequestStatus;
 import com.gautama.abscencerecordhitsbackend.api.mapper.RequestMapper;
 import com.gautama.abscencerecordhitsbackend.core.model.FileEntity;
 import com.gautama.abscencerecordhitsbackend.core.model.Request;
@@ -14,27 +10,26 @@ import com.gautama.abscencerecordhitsbackend.core.repository.FileRepository;
 import com.gautama.abscencerecordhitsbackend.core.repository.RequestRepository;
 import com.gautama.abscencerecordhitsbackend.core.repository.UserRepository;
 import com.gautama.abscencerecordhitsbackend.core.validator.DateValidator;
-import jakarta.persistence.EntityNotFoundException;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
-import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
-
+@AllArgsConstructor
 @Service
 public class RequestService {
     public final RequestRepository requestRepository;
@@ -44,18 +39,9 @@ public class RequestService {
     private final RequestMapper requestMapper;
     private final DateValidator dateValidator;
 
-    public RequestService(RequestRepository requestRepository, FileRepository fileRepository, UserRepository userRepository, UserService userService,
-                          RequestMapper requestMapper, DateValidator dateValidator) {
-        this.requestRepository = requestRepository;
-        this.fileRepository = fileRepository;
-        this.userRepository = userRepository;
-        this.userService = userService;
-        this.requestMapper = requestMapper;
-        this.dateValidator = dateValidator;
-    }
 
     public Request getRequest(Long id) {
-        return requestRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Заявки с указанным Id: " + id + " не существует"));
+        return requestRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Заявки с указанным Id: " + id + " не существует"));
     }
 
     public Request saveRequest(Request request) {
@@ -77,11 +63,11 @@ public class RequestService {
             return requestMapper.toDto(savedRequest);
         }
 
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректные входные данные для даты.");
+        throw new IllegalArgumentException("Некорректные входные данные для даты.");
     }
 
     public void changeRequestStatus(Long id, RequestStatus requestStatus) {
-        Request request = requestRepository.findById(id).orElseThrow(() -> new RuntimeException("Заявка не найдена."));
+        Request request = requestRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Заявка не найдена."));
         request.setStatus(requestStatus);
         requestRepository.save(request);
     }
@@ -137,13 +123,13 @@ public class RequestService {
         FileEntity fileToRemove = request.getProofs().stream()
                 .filter(file -> file.getId().equals(fileId))
                 .findFirst()
-                .orElseThrow(() -> new EntityNotFoundException("Файл с id " + fileId + " не найден в заявке с id " + requestId));
+                .orElseThrow(() -> new NoSuchElementException("Файл с id " + fileId + " не найден в заявке с id " + requestId));
 
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User currentUser = userService.loadUserByUsername(userDetails.getUsername());
 
         if (!request.getUser().getId().equals(currentUser.getId())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Это не ваша заявки либо не ваш файл");
+            throw new AccessDeniedException("Это не ваша заявки либо не ваш файл");
         }
 
         request.getProofs().remove(fileToRemove);
@@ -154,14 +140,14 @@ public class RequestService {
     @Transactional(readOnly = true)
     public RequestDetailsDTO getRequestWithFileDownloadLink(Long requestId) throws AccessDeniedException {
         Request request = requestRepository.findById(requestId)
-                .orElseThrow(() -> new EntityNotFoundException("Заявки с указанным id не найдено: " + requestId));
+                .orElseThrow(() -> new NoSuchElementException("Заявки с указанным id не найдено: " + requestId));
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         String email = userDetails.getUsername();
 
         User currentUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("Пользователь с email " + email + " не найден"));
+                .orElseThrow(() -> new NoSuchElementException("Пользователь с email " + email + " не найден"));
         Long userId = currentUser.getId();
 
         boolean isStudent = authentication.getAuthorities().stream()
@@ -200,7 +186,7 @@ public class RequestService {
     @Transactional(readOnly = true)
     public ResponseEntity<byte[]> downloadFile(Long fileId) {
         FileEntity fileEntity = fileRepository.findById(fileId)
-                .orElseThrow(() -> new EntityNotFoundException("Файл с указанным id не найден: " + fileId));
+                .orElseThrow(() -> new NoSuchElementException("Файл с указанным id не найден: " + fileId));
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileEntity.getFileName() + "\"")
@@ -220,7 +206,7 @@ public class RequestService {
             String email = userDetails.getUsername();
 
             User currentUser = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new EntityNotFoundException("Пользователь с email " + email + " не найден"));
+                    .orElseThrow(() -> new NoSuchElementException("Пользователь с email " + email + " не найден"));
             Long currentUserId = currentUser.getId();
             requests = requestRepository.findByUser_Id(currentUserId);
         } else {

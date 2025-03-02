@@ -10,9 +10,12 @@ import com.gautama.abscencerecordhitsbackend.core.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.NoSuchElementException;
 
 @AllArgsConstructor
 @Service
@@ -43,7 +46,7 @@ public class AuthService {
 
     public String login(String email, String password) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Пользователь не найден."));
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException("Пользователь не найден."));
         return jwtUtil.generateToken(user);
     }
 
@@ -51,7 +54,7 @@ public class AuthService {
     public void logout(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new RuntimeException("Неверный токен.");
+            throw new BadCredentialsException("Неверный токен.");
         }
 
         String token = authHeader.substring(7);

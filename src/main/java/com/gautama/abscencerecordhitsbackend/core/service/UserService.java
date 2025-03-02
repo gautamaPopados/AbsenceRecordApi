@@ -6,15 +6,12 @@ import com.gautama.abscencerecordhitsbackend.api.enums.Role;
 import com.gautama.abscencerecordhitsbackend.api.mapper.UserMapper;
 import com.gautama.abscencerecordhitsbackend.core.model.User;
 import com.gautama.abscencerecordhitsbackend.core.repository.UserRepository;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -32,12 +29,12 @@ public class UserService implements UserDetailsService {
     public User grantDeanRole(Long userId) {
         Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь с ID " + userId + " не найден.");
+            throw new NoSuchElementException("Пользователь с ID " + userId + " не найден.");
         }
 
         User user = optionalUser.get();
         if (user.getRole() == Role.DEANERY) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "У пользователя с ID " + userId + " уже есть роль Деканат.");
+            throw new IllegalArgumentException("У пользователя с ID " + userId + " уже есть роль Деканат.");
         }
 
         user.setRole(Role.DEANERY);
@@ -45,23 +42,23 @@ public class UserService implements UserDetailsService {
     }
 
     public User loadUserByUsername(String username) {
-        return userRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException("Пользователь с почтой: " + username + " не найден"));
+        return userRepository.findByEmail(username).orElseThrow(() -> new NoSuchElementException("Пользователь с почтой: " + username + " не найден"));
     }
 
     public User grantRole(Long userId, Role role) {
         Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь с ID " + userId + " не найден.");
+            throw new NoSuchElementException("Пользователь с ID " + userId + " не найден.");
         }
 
         User user = optionalUser.get();
 
         if (role == Role.DEANERY) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Назначение роли Деканат доступно только Админу.");
+            throw new NoSuchElementException("Назначение роли Деканат доступно только Админу.");
         }
 
         if (user.getRole() == role) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "У пользователя с ID " + userId + " уже есть роль " + role.getDisplayName() + ".");
+            throw new IllegalArgumentException("У пользователя с ID " + userId + " уже есть роль " + role.getDisplayName() + ".");
         }
 
         user.setRole(role);

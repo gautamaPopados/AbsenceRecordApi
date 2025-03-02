@@ -19,12 +19,13 @@ import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.util.List;
 
-@RestController("/request")
+@RestController
+@RequestMapping("/request")
 @RequiredArgsConstructor
 public class RequestController {
     private final RequestService requestService;
 
-    @PostMapping
+    @PostMapping("")
     public ResponseEntity<RequestResultDTO> createRequest(@RequestBody RequestDTO requestDTO) {
         RequestResultDTO savedRequestDto = requestService.createRequest(requestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedRequestDto);
@@ -36,7 +37,7 @@ public class RequestController {
         if (extendRequest != null) {
             return ResponseEntity.status(HttpStatus.OK).body(extendRequest);
         }
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Неккоректные входные данные для даты");
+        throw new IllegalArgumentException("Неккоректные входные данные для даты");
     }
 
     @PostMapping(value = "/upload/{requestId}", consumes = "multipart/form-data")
@@ -48,8 +49,7 @@ public class RequestController {
             FileResultDTO fileResultDTO = requestService.addFile(requestId, file);
             return ResponseEntity.status(HttpStatus.OK).body(fileResultDTO);
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Ошибка при прикреплении файла: " + e.getMessage());
+            throw new NullPointerException("Ошибка при прикреплении файла: " + e.getMessage());
         }
     }
 
