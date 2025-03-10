@@ -28,7 +28,7 @@ public class AuthService {
 
     public String register(RegisterDTO request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new RuntimeException("Пользователь уже существует.");
+            throw new BadCredentialsException("Пользователь уже существует.");
         }
 
         Role role = Role.USER;
