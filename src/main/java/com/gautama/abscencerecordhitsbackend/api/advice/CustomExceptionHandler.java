@@ -67,9 +67,7 @@ public class CustomExceptionHandler {
     public ProblemDetail handleValidationException(MethodArgumentNotValidException e) {
         AtomicReference<String> errors = new AtomicReference<>("");
         e.getBindingResult().getFieldErrors().forEach(error ->
-                {
-                    errors.set(errors + String.join(": ", error.getField(), error.getDefaultMessage()) + " \n ");
-                }
+                errors.set(errors + String.join(": ", error.getField(), error.getDefaultMessage()) + " \n ")
         );
 
         return ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(400), errors.get());
@@ -88,5 +86,10 @@ public class CustomExceptionHandler {
     @ExceptionHandler(NullPointerException.class)
     public ProblemDetail handleNullPointerException(NullPointerException e) {
         return ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500), "Unexpected null value encountered." + e.getMessage());
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ProblemDetail handleRuntimeException(RuntimeException e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500), "Unexpected error encountered." + e.getMessage());
     }
 }

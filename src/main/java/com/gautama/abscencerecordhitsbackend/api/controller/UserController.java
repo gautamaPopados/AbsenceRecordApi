@@ -1,6 +1,7 @@
 package com.gautama.abscencerecordhitsbackend.api.controller;
 
 import com.gautama.abscencerecordhitsbackend.api.dto.UserDTO;
+import com.gautama.abscencerecordhitsbackend.api.enums.Group;
 import com.gautama.abscencerecordhitsbackend.api.enums.Role;
 import com.gautama.abscencerecordhitsbackend.api.enums.UserQueryType;
 import com.gautama.abscencerecordhitsbackend.core.model.User;
@@ -24,9 +25,10 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<List<UserDTO>> getUsers(
-            @RequestParam(required = false) UserQueryType queryType
+            @RequestParam(required = false) UserQueryType queryType,
+            @RequestParam(required = false) Group group
     ) {
-        List<UserDTO> users = userService.getUsers(queryType);
+        List<UserDTO> users = userService.getUsers(queryType, group);
         return ResponseEntity.ok(users);
     }
 

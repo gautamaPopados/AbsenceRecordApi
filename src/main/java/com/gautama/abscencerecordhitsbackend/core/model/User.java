@@ -1,6 +1,7 @@
 package com.gautama.abscencerecordhitsbackend.core.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.gautama.abscencerecordhitsbackend.api.enums.Group;
 import com.gautama.abscencerecordhitsbackend.api.enums.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -32,6 +33,9 @@ public class User implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @Enumerated(EnumType.STRING)
+    private Group studentGroup;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference

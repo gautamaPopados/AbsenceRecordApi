@@ -55,6 +55,7 @@ public class SecurityConfig extends WebSecurityConfiguration {
                         .requestMatchers(HttpMethod.PUT, "/api/users/{userId}/grant-dean-role").hasAuthority(Role.ADMIN.toString())
                         .requestMatchers(HttpMethod.GET, "/request_info/**").hasAnyAuthority(Role.DEANERY.toString(), Role.STUDENT.toString(), Role.TEACHER.toString())
                         .requestMatchers(HttpMethod.GET, "/request_list").hasAnyAuthority(Role.DEANERY.toString(), Role.STUDENT.toString(), Role.TEACHER.toString())
+                        .requestMatchers(HttpMethod.GET, "/users").hasAnyAuthority(Role.DEANERY.toString(), Role.ADMIN.toString(), Role.TEACHER.toString())
 
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

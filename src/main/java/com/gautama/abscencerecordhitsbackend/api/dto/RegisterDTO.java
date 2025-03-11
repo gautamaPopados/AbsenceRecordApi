@@ -1,9 +1,7 @@
 package com.gautama.abscencerecordhitsbackend.api.dto;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import com.gautama.abscencerecordhitsbackend.api.enums.Group;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -38,4 +36,6 @@ public class RegisterDTO {
             message = "Только латинские символы, цифры, знаки только !?. Обязательно наличие минимум 1 буквы верхнего и нижнего регистра, цифры и знака."
     )
     String password;
+
+    Group group;
 }

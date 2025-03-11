@@ -1,6 +1,7 @@
 package com.gautama.abscencerecordhitsbackend.core.service;
 
 import com.gautama.abscencerecordhitsbackend.api.dto.UserDTO;
+import com.gautama.abscencerecordhitsbackend.api.enums.Group;
 import com.gautama.abscencerecordhitsbackend.api.enums.UserQueryType;
 import com.gautama.abscencerecordhitsbackend.api.enums.Role;
 import com.gautama.abscencerecordhitsbackend.api.mapper.UserMapper;
@@ -65,7 +66,7 @@ public class UserService implements UserDetailsService {
         return userRepository.save(user);
     }
 
-    public List<UserDTO> getUsers(UserQueryType queryType) {
+    public List<UserDTO> getUsers(UserQueryType queryType, Group group) {
         List<User> users;
 
         if (queryType == null || queryType == UserQueryType.ALL) {
@@ -78,6 +79,12 @@ public class UserService implements UserDetailsService {
             users = userRepository.findAllByRoleIsNull();
         } else {
             throw new IllegalArgumentException("Неизвестный тип запроса пользователей: " + queryType);
+        }
+
+        if (group != null) {
+            users = users.stream()
+                    .filter(user -> group.equals(user.getStudentGroup()))
+                    .collect(Collectors.toList());
         }
 
         return users.stream()
