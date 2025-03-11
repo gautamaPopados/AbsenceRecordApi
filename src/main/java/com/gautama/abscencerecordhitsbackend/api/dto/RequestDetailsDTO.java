@@ -12,5 +12,5 @@ public class RequestDetailsDTO {
     private LocalDate finishedSkipping;
     private String status;
     private List<FileInfoDto> files;
-    private Long userId;
+    private UserDTO user;
 }

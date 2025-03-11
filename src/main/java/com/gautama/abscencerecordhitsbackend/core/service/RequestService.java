@@ -148,12 +148,11 @@ public class RequestService {
 
         User currentUser = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NoSuchElementException("Пользователь с email " + email + " не найден"));
-        Long userId = currentUser.getId();
 
         boolean isStudent = authentication.getAuthorities().stream()
                 .anyMatch(role -> role.getAuthority().equals("STUDENT"));
 
-        if (isStudent && !request.getUser().getId().equals(userId)) {
+        if (isStudent && !request.getUser().getId().equals(currentUser.getId())) {
             throw new AccessDeniedException("Вы не можете просматривать чужие заявки");
         }
 
@@ -162,7 +161,14 @@ public class RequestService {
         requestDetailsDTO.setStartedSkipping(request.getStartedSkipping());
         requestDetailsDTO.setFinishedSkipping(request.getFinishedSkipping());
         requestDetailsDTO.setStatus(request.getStatus().toString());
-        requestDetailsDTO.setUserId(request.getUser().getId());
+
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(currentUser.getId());
+        userDTO.setFirstName(currentUser.getFirstName());
+        userDTO.setLastName(currentUser.getLastName());
+        userDTO.setEmail(currentUser.getEmail());
+        userDTO.setUserRole(currentUser.getRole());
+        requestDetailsDTO.setUser(userDTO);
 
         List<FileInfoDto> fileInfoDtos = request.getProofs().stream()
                 .map(fileEntity -> {
