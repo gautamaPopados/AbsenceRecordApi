@@ -1,9 +1,6 @@
 package com.gautama.abscencerecordhitsbackend.api.mapper;
 
-import com.gautama.abscencerecordhitsbackend.api.dto.RequestDTO;
-import com.gautama.abscencerecordhitsbackend.api.dto.ExtendRequestDateResultDTO;
-import com.gautama.abscencerecordhitsbackend.api.dto.RequestListDTO;
-import com.gautama.abscencerecordhitsbackend.api.dto.RequestResultDTO;
+import com.gautama.abscencerecordhitsbackend.api.dto.*;
 import com.gautama.abscencerecordhitsbackend.api.enums.RequestStatus;
 import com.gautama.abscencerecordhitsbackend.core.model.Request;
 import com.gautama.abscencerecordhitsbackend.core.model.User;
@@ -56,7 +53,18 @@ public class RequestMapper {
         dto.setStartedSkipping(request.getStartedSkipping());
         dto.setFinishedSkipping(request.getFinishedSkipping());
         dto.setStatus(String.valueOf(request.getStatus()));
-        dto.setUserId(request.getUser() != null ? request.getUser().getId() : null);
+
+        User user = request.getUser();
+        if (user != null) {
+            UserDTO userDTO = new UserDTO();
+            userDTO.setId(user.getId());
+            userDTO.setFirstName(user.getFirstName());
+            userDTO.setLastName(user.getLastName());
+            userDTO.setEmail(user.getEmail());
+            userDTO.setUserRole(user.getRole());
+            dto.setUser(userDTO);
+        }
+
         return dto;
     }
 }

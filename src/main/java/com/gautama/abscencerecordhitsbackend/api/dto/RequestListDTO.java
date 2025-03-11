@@ -10,5 +10,5 @@ public class RequestListDTO {
     private LocalDate startedSkipping;
     private LocalDate finishedSkipping;
     private String status;
-    private Long userId;
+    private UserDTO user;
 }

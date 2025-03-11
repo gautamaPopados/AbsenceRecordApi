@@ -213,8 +213,8 @@ public class RequestService {
 
             User currentUser = userRepository.findByEmail(email)
                     .orElseThrow(() -> new NoSuchElementException("Пользователь с email " + email + " не найден"));
-            Long currentUserId = currentUser.getId();
-            requests = requestRepository.findByUser_Id(currentUserId);
+
+            requests = requestRepository.findByUser_Id(currentUser.getId());
         } else {
             if (userId != null) {
                 requests = requestRepository.findByUser_Id(userId);
