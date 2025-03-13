@@ -87,9 +87,9 @@ public class CustomExceptionHandler {
     public ProblemDetail handleNullPointerException(NullPointerException e) {
         return ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500), "Unexpected null value encountered." + e.getMessage());
     }
-
-    @ExceptionHandler(RuntimeException.class)
-    public ProblemDetail handleRuntimeException(RuntimeException e) {
-        return ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500), "Unexpected error encountered." + e.getMessage());
-    }
+//
+//    @ExceptionHandler(RuntimeException.class)
+//    public ProblemDetail handleRuntimeException(RuntimeException e) {
+//        return ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500), "Unexpected error encountered." + e.getMessage());
+//    }
 }

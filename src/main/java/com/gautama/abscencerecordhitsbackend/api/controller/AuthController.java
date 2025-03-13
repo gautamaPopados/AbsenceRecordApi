@@ -2,6 +2,7 @@ package com.gautama.abscencerecordhitsbackend.api.controller;
 
 import com.gautama.abscencerecordhitsbackend.api.dto.LoginDTO;
 import com.gautama.abscencerecordhitsbackend.api.dto.RegisterDTO;
+import com.gautama.abscencerecordhitsbackend.api.dto.TokenDTO;
 import com.gautama.abscencerecordhitsbackend.core.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -16,12 +17,12 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody @Valid RegisterDTO request) {
+    public ResponseEntity<TokenDTO> register(@RequestBody @Valid RegisterDTO request) {
         return ResponseEntity.ok(authService.register(request));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody @Valid LoginDTO request) {
+    public ResponseEntity<TokenDTO> login(@RequestBody @Valid LoginDTO request) {
         return ResponseEntity.ok(authService.login(request.getEmail(), request.getPassword()));
     }
 
@@ -30,5 +31,7 @@ public class AuthController {
         authService.logout(request);
         return ResponseEntity.ok("User logged out successfully");
     }
+
+
 }
 

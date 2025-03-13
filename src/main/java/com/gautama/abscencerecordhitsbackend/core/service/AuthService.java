@@ -2,6 +2,7 @@ package com.gautama.abscencerecordhitsbackend.core.service;
 
 import com.gautama.abscencerecordhitsbackend.api.config.JwtUtil;
 import com.gautama.abscencerecordhitsbackend.api.dto.RegisterDTO;
+import com.gautama.abscencerecordhitsbackend.api.dto.TokenDTO;
 import com.gautama.abscencerecordhitsbackend.api.enums.Role;
 import com.gautama.abscencerecordhitsbackend.core.model.RevokedToken;
 import com.gautama.abscencerecordhitsbackend.core.model.User;
@@ -26,7 +27,7 @@ public class AuthService {
     private final RevokedTokenRepository revokedTokenRepository;
     private final JwtUtil jwtUtil;
 
-    public String register(RegisterDTO request) {
+    public TokenDTO register(RegisterDTO request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new BadCredentialsException("Пользователь уже существует.");
         }
@@ -42,13 +43,13 @@ public class AuthService {
         user.setStudentGroup(request.getGroup());
 
         userRepository.save(user);
-        return jwtUtil.generateToken(user);
+        return new TokenDTO(jwtUtil.generateToken(user));
     }
 
-    public String login(String email, String password) {
+    public TokenDTO login(String email, String password) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
         User user = userRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException("Пользователь не найден."));
-        return jwtUtil.generateToken(user);
+        return new TokenDTO(jwtUtil.generateToken(user));
     }
 
 
@@ -63,4 +64,5 @@ public class AuthService {
         revokedToken.setToken(token);
         revokedTokenRepository.save(revokedToken);
     }
+
 }

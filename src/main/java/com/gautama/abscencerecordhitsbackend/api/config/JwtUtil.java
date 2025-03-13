@@ -28,10 +28,10 @@ public class JwtUtil {
 
     public String generateToken(UserDetails userDetails) {
         return Jwts.builder()
-                .setSubject(userDetails.getUsername())
+                .subject(userDetails.getUsername())
                 .claim("roles", userDetails.getAuthorities())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -41,15 +41,15 @@ public class JwtUtil {
     }
 
     public boolean validateToken(String token, UserDetails userDetails) {
-        logger.warn("isrevoked or expired" + String.valueOf(isTokenExpired(token)));
+        logger.warn("isrevoked or expired" + isTokenExpired(token));
         return extractUsername(token).equals(userDetails.getUsername()) && !isTokenExpired(token);
     }
 
     private boolean isTokenExpired(String token) {
         boolean isRevoked = revokedTokenRepository.existsByToken(token);
 
-        logger.warn("isrevoked" + String.valueOf(isRevoked));
-        logger.warn("isexpired" + String.valueOf(extractClaim(token, Claims::getExpiration).before(new Date())));
+        logger.warn("isrevoked" + isRevoked);
+        logger.warn("isexpired" + extractClaim(token, Claims::getExpiration).before(new Date()));
 
         return isRevoked || extractClaim(token, Claims::getExpiration).before(new Date());
     }

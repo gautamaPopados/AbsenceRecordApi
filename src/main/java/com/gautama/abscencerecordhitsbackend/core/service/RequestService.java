@@ -3,6 +3,7 @@ package com.gautama.abscencerecordhitsbackend.core.service;
 import com.gautama.abscencerecordhitsbackend.api.dto.*;
 import com.gautama.abscencerecordhitsbackend.api.enums.RequestStatus;
 import com.gautama.abscencerecordhitsbackend.api.mapper.RequestMapper;
+import com.gautama.abscencerecordhitsbackend.api.mapper.UserMapper;
 import com.gautama.abscencerecordhitsbackend.core.model.FileEntity;
 import com.gautama.abscencerecordhitsbackend.core.model.Request;
 import com.gautama.abscencerecordhitsbackend.core.model.User;
@@ -38,6 +39,7 @@ public class RequestService {
     private final UserService userService;
     private final RequestMapper requestMapper;
     private final DateValidator dateValidator;
+    private final UserMapper userMapper;
 
 
     public Request getRequest(Long id) {
@@ -162,12 +164,7 @@ public class RequestService {
         requestDetailsDTO.setFinishedSkipping(request.getFinishedSkipping());
         requestDetailsDTO.setStatus(request.getStatus().toString());
 
-        UserDTO userDTO = new UserDTO();
-        userDTO.setId(currentUser.getId());
-        userDTO.setFirstName(currentUser.getFirstName());
-        userDTO.setLastName(currentUser.getLastName());
-        userDTO.setEmail(currentUser.getEmail());
-        userDTO.setUserRole(currentUser.getRole());
+        UserDTO userDTO = userMapper.userToUserDto(currentUser);
         requestDetailsDTO.setUser(userDTO);
 
         List<FileInfoDto> fileInfoDtos = request.getProofs().stream()

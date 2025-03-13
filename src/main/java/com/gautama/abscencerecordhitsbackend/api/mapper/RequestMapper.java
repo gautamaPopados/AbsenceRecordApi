@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class RequestMapper {
+
     public RequestResultDTO toDto(Request request) {
         if (request == null) {
             return null;
@@ -56,12 +57,13 @@ public class RequestMapper {
 
         User user = request.getUser();
         if (user != null) {
-            UserDTO userDTO = new UserDTO();
-            userDTO.setId(user.getId());
-            userDTO.setFirstName(user.getFirstName());
-            userDTO.setLastName(user.getLastName());
-            userDTO.setEmail(user.getEmail());
-            userDTO.setUserRole(user.getRole());
+            UserDTO userDTO = new UserDTO(
+                    user.getId(),
+                    user.getFirstName(),
+                    user.getLastName(),
+                    user.getEmail(),
+                    user.getStudentGroup(),
+                    user.getRole());
             dto.setUser(userDTO);
         }
 

@@ -1,11 +1,13 @@
 package com.gautama.abscencerecordhitsbackend.api.controller;
 
 import com.gautama.abscencerecordhitsbackend.api.dto.UserDTO;
+import com.gautama.abscencerecordhitsbackend.api.dto.UserFullDTO;
 import com.gautama.abscencerecordhitsbackend.api.enums.Group;
 import com.gautama.abscencerecordhitsbackend.api.enums.Role;
 import com.gautama.abscencerecordhitsbackend.api.enums.UserQueryType;
 import com.gautama.abscencerecordhitsbackend.core.model.User;
 import com.gautama.abscencerecordhitsbackend.core.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -42,5 +44,10 @@ public class UserController {
     public ResponseEntity<User> grantRole(@PathVariable Long userId, @RequestParam Role role) {
         User updatedUser = userService.grantRole(userId, role);
         return ResponseEntity.ok(updatedUser);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserFullDTO> me(HttpServletRequest request) {
+        return ResponseEntity.ok(userService.getMe(request));
     }
 }

@@ -1,14 +1,18 @@
 package com.gautama.abscencerecordhitsbackend.core.service;
 
+import com.gautama.abscencerecordhitsbackend.api.config.JwtUtil;
 import com.gautama.abscencerecordhitsbackend.api.dto.UserDTO;
+import com.gautama.abscencerecordhitsbackend.api.dto.UserFullDTO;
 import com.gautama.abscencerecordhitsbackend.api.enums.Group;
 import com.gautama.abscencerecordhitsbackend.api.enums.UserQueryType;
 import com.gautama.abscencerecordhitsbackend.api.enums.Role;
 import com.gautama.abscencerecordhitsbackend.api.mapper.UserMapper;
 import com.gautama.abscencerecordhitsbackend.core.model.User;
 import com.gautama.abscencerecordhitsbackend.core.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.AllArgsConstructor;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,16 +20,12 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@AllArgsConstructor
 @Service
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-
-    @Autowired
-    public UserService(UserRepository userRepository, UserMapper userMapper) {
-        this.userRepository = userRepository;
-        this.userMapper = userMapper;
-    }
+    private final JwtUtil jwtUtil;
 
     public User grantDeanRole(Long userId) {
         Optional<User> optionalUser = userRepository.findById(userId);
@@ -90,5 +90,16 @@ public class UserService implements UserDetailsService {
         return users.stream()
                 .map(userMapper::userToUserDto)
                 .collect(Collectors.toList());
+    }
+
+    public UserFullDTO getMe(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new BadCredentialsException("Неверный токен.");
+        }
+
+        String token = authHeader.substring(7);
+        User user = loadUserByUsername(jwtUtil.extractUsername(token));
+        return userMapper.userToUserFullDto(user);
     }
 }
